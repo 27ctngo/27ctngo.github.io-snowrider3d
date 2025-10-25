@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Snow Rider 3D - Thrilling Skiing Adventure Game</title>
+    <meta name="description" content="Immerse yourself in Snow Rider 3D, a thrilling skiing adventure game set in breathtaking mountain landscapes. Ride your sleigh down snowy slopes, dodge obstacles, and collect gifts for an exhilarating experience.">
+    <meta name="theme-color" content="#007ACC">
+    <link rel="shortcut icon" href="TemplateData/favicon.ico">
+    <link rel="stylesheet" href="TemplateData/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Your Name">
+    <meta name="keywords" content="Snow Rider 3D, skiing game, winter sports, snowboarding, ski game, mountain landscapes, skiing adventure, snowboarding adventure, snowy mountain, sleigh ride, winter game">
+    <script src="TemplateData/UnityProgress.js"></script>
+    <script src="Build/UnityLoader.js"></script>
+    <script>
+        var gameInstance = UnityLoader.instantiate("gameContainer", "Build/SnowRider3D-gd-1.json", {onProgress: UnityProgress,Module:{onRuntimeInitialized: function() {UnityProgress(gameInstance, "complete")}}});
+    </script>
+</head>
+<body style="overflow:hidden;padding:0px;margin:0px;">
+    <div class="webgl-content">
+        <div id="gameContainer" style="width: 960px; height: 600px; margin: auto"></div>
+    </div>
+
+<!-- Admin Panel Overlay - added by ChatGPT -->
+<style>
+#adminToggle{position:fixed;right:12px;top:12px;z-index:9999;padding:8px 10px;background:#222;color:#fff;border-radius:6px;cursor:pointer;opacity:0.9}
+#adminPanel{position:fixed;right:12px;top:54px;z-index:9999;background:rgba(0,0,0,0.85);color:#fff;padding:12px;border-radius:8px;width:260px;display:none;font-family:Arial,Helvetica,sans-serif}
+#adminPanel h3{margin:0 0 8px 0;font-size:16px}
+.adminRow{display:flex;gap:8px;margin:6px 0}
+.adminRow input[type=number]{width:80px}
+.adminRow button, #adminPanel button{flex:1;padding:6px;border-radius:6px;border:0;background:#007acc;color:#fff;cursor:pointer}
+.adminSmall{font-size:12px;color:#ccc;margin-top:6px}
+</style>
+<div id="adminToggle">Admin</div>
+<div id="adminPanel" role="dialog" aria-label="Admin Panel">
+  <h3>Admin Panel (Overlay)</h3>
+  <div class="adminRow"><button onclick="adminGiveAllSleds()">Give all sleds</button></div>
+  <div class="adminRow"><button onclick="adminGiveInfinitePresents()">Give infinite presents</button></div>
+  <div class="adminRow"><button onclick="adminToggleInvulnerability()">Toggle invulnerability</button></div>
+  <div class="adminRow">
+    <input id="durValue" type="number" placeholder="durability" min="1" value="100">
+    <button onclick="adminSetDurability()">Set durability</button>
+  </div>
+  <div class="adminRow">
+    <input id="upgradeName" type="text" placeholder="upgrade name" value="Speed">
+    <input id="upgradeAmount" type="number" placeholder="amount" value="1" style="width:70px">
+    <button onclick="adminGiveUpgrade()">Give upgrade</button>
+  </div>
+  <div class="adminSmall">Note: This overlay sends commands to the Unity game using <code>SendMessage</code>. The Unity project must include an <code>AdminHandler</code> script with matching public methods. See /UnityScripts for example C# handlers.</div>
+</div>
+
+<script>
+(function(){
+  var toggle = document.getElementById('adminToggle');
+  var panel = document.getElementById('adminPanel');
+  toggle.addEventListener('click', function(){ panel.style.display = (panel.style.display === 'none') ? 'block' : 'none'; });
+
+  function sendToUnity(obj, method, param){
+    try{
+      if(typeof gameInstance !== 'undefined' && gameInstance && gameInstance.SendMessage){
+        gameInstance.SendMessage(obj, method, param===undefined ? "" : String(param));
+        console.log('[Admin] Sent', obj, method, param);
+      }else{
+        console.warn('[Admin] gameInstance.SendMessage not available yet. Command skipped:', method, param);
+      }
+    }catch(e){
+      console.error('[Admin] SendMessage error', e);
+    }
+  }
+
+  window.adminGiveAllSleds = function(){ sendToUnity('AdminHandler','GiveAllSleds'); }
+  window.adminGiveInfinitePresents = function(){ sendToUnity('AdminHandler','GiveInfinitePresents'); }
+  window.adminToggleInvulnerability = function(){ sendToUnity('AdminHandler','ToggleInvulnerability'); }
+  window.adminSetDurability = function(){
+    var v = document.getElementById('durValue').value || '100';
+    sendToUnity('AdminHandler','SetAllSledDurability', v);
+  }
+  window.adminGiveUpgrade = function(){
+    var name = document.getElementById('upgradeName').value || 'Speed';
+    var amt = document.getElementById('upgradeAmount').value || '1';
+    sendToUnity('AdminHandler','GiveUpgrade', name + '|' + amt);
+  }
+
+})();
+</script>
+<!-- End Admin Panel Overlay -->
+
+</body>
+</html>
+
